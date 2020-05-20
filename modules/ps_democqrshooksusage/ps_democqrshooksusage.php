@@ -1,16 +1,18 @@
- <?php
-
+<?php
 
 use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
 use PrestaShopBundle\Form\Admin\Type\YesAndNoChoiceType;
-use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractGridDefinitionFactory;
+use Symfony\Component\Form\FormBuilderInterface;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
+use Doctrine\DBAL\Query\QueryBuilder;
+use PrestaShop\PrestaShop\Core\Search\Filters\CustomerFilters;
+use PrestaShop\PrestaShop\Core\Product\Search\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 
-use Symfony\Component\Form\FormBuilderInterface;
-use PrestaShopBundle\Form\Admin\Type\SwitchType;
-
+use Symfony\Component\Form\AbstractType;
+use PrestaShopBundle\Form\Admin\Type\TextWithUnitType;
 /**
 * 2007-2020 PrestaShop
 *
@@ -40,13 +42,13 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Ps_creaTablas extends Module 
+class Ps_democqrshooksusage extends Module
 {
     protected $config_form = false;
 
     public function __construct()
     {
-        $this->name = 'ps_creaTablas';
+        $this->name = 'ps_democqrshooksusage';
         $this->tab = 'administration';
         $this->version = '1.0.0';
         $this->author = 'Nicolás Caffa Carreras';
@@ -59,8 +61,8 @@ class Ps_creaTablas extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->l('ps_creaTablas');
-        $this->description = $this->l('Crea tablas en ps_customer');
+        $this->displayName = $this->l('ps_democqrshooksusage');
+        $this->description = $this->l('ps_democqrshooksusage');
 
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
@@ -71,42 +73,24 @@ class Ps_creaTablas extends Module
      */
     public function install()
     {
-        Configuration::updateValue('PS_CREATABLAS_LIVE_MODE', false);
+        Configuration::updateValue('PS_DEMOCQRSHOOKSUSAGE_LIVE_MODE', false);
 
-         include(dirname(__FILE__).'/sql/install.php');
- 
-        //  if($this->crearColumna()){
-        //      echo "funciona";
-        //      return true;
-        //  }else{
-        //      echo "no funciona";
-        // }
+        include(dirname(__FILE__).'/sql/install.php');
 
         return parent::install() &&
-            $this->registerHook('header') &&
-            $this->registerHook('backOfficeHeader');
-            $this->registerHook('actionCustomerGridDefinitionModifier') &&
-            $this->registerHook('actionCustomerGridQueryBuilderModifier') &&
-            $this->registerHook('actionCustomerFormBuilderModifier') &&
-            $this->registerHook('actionAfterCreateCustomerFormHandler') &&
-            $this->registerHook('actionAfterUpdateCustomerFormHandler');
-           
-			
-			// $this->crearColumna();
+        $this->registerHook('actionCustomerGridDefinitionModifier') &&
+        $this->registerHook('actionCustomerGridQueryBuilderModifier') &&
+        $this->registerHook('actionCustomerFormBuilderModifier') &&
+        $this->registerHook('actionAfterCreateCustomerFormHandler') &&
+        $this->registerHook('actionAfterUpdateCustomerFormHandler') &&
+        $this->installTables();
     }
 
     public function uninstall()
     {
-        Configuration::deleteByName('PS_CREATABLAS_LIVE_MODE');
-        include(dirname(__FILE__).'/sql/uninstall.php');
-      
+        Configuration::deleteByName('PS_DEMOCQRSHOOKSUSAGE_LIVE_MODE');
 
-        //  if($this->borrarColumna()){
-        //      echo "funciona";
-        //      return true;
-        //  }else{
-        //      echo "no funciona";
-        //  }
+        include(dirname(__FILE__).'/sql/uninstall.php');
 
         return parent::uninstall();
     }
@@ -119,7 +103,7 @@ class Ps_creaTablas extends Module
         /**
          * If values have been submitted in the form, process.
          */
-        if (((bool)Tools::isSubmit('submitPs_creaTablasModule')) == true) {
+        if (((bool)Tools::isSubmit('submitPs_democqrshooksusageModule')) == true) {
             $this->postProcess();
         }
 
@@ -144,7 +128,7 @@ class Ps_creaTablas extends Module
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
 
         $helper->identifier = $this->identifier;
-        $helper->submit_action = 'submitPs_creaTablasModule';
+        $helper->submit_action = 'submitPs_democqrshooksusageModule';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
             .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
@@ -173,7 +157,7 @@ class Ps_creaTablas extends Module
                     array(
                         'type' => 'switch',
                         'label' => $this->l('Live mode'),
-                        'name' => 'PS_CREATABLAS_LIVE_MODE',
+                        'name' => 'PS_DEMOCQRSHOOKSUSAGE_LIVE_MODE',
                         'is_bool' => true,
                         'desc' => $this->l('Use this module in live mode'),
                         'values' => array(
@@ -194,12 +178,12 @@ class Ps_creaTablas extends Module
                         'type' => 'text',
                         'prefix' => '<i class="icon icon-envelope"></i>',
                         'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'PS_CREATABLAS_ACCOUNT_EMAIL',
+                        'name' => 'PS_DEMOCQRSHOOKSUSAGE_ACCOUNT_EMAIL',
                         'label' => $this->l('Email'),
                     ),
                     array(
                         'type' => 'password',
-                        'name' => 'PS_CREATABLAS_ACCOUNT_PASSWORD',
+                        'name' => 'PS_DEMOCQRSHOOKSUSAGE_ACCOUNT_PASSWORD',
                         'label' => $this->l('Password'),
                     ),
                 ),
@@ -216,9 +200,9 @@ class Ps_creaTablas extends Module
     protected function getConfigFormValues()
     {
         return array(
-            'PS_CREATABLAS_LIVE_MODE' => Configuration::get('PS_CREATABLAS_LIVE_MODE', true),
-            'PS_CREATABLAS_ACCOUNT_EMAIL' => Configuration::get('PS_CREATABLAS_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'PS_CREATABLAS_ACCOUNT_PASSWORD' => Configuration::get('PS_CREATABLAS_ACCOUNT_PASSWORD', null),
+            'PS_DEMOCQRSHOOKSUSAGE_LIVE_MODE' => Configuration::get('PS_DEMOCQRSHOOKSUSAGE_LIVE_MODE', true),
+            'PS_DEMOCQRSHOOKSUSAGE_ACCOUNT_EMAIL' => Configuration::get('PS_DEMOCQRSHOOKSUSAGE_ACCOUNT_EMAIL', 'contact@prestashop.com'),
+            'PS_DEMOCQRSHOOKSUSAGE_ACCOUNT_PASSWORD' => Configuration::get('PS_DEMOCQRSHOOKSUSAGE_ACCOUNT_PASSWORD', null),
         );
     }
 
@@ -253,26 +237,21 @@ class Ps_creaTablas extends Module
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
     }
-    
-
-    //  public function crearColumna(){
-
-    //     // $sql='ALTER TABLE '._DB_PREFIX_.'ps_customer ADD prueba1 VARCHAR(250) NULL';
-
-    //      $sql='ALTER TABLE '._DB_PREFIX_.'customer ADD prueba1 VARCHAR(250) NULL';
-    
-    //           return  Db::getInstance()->execute($sql);
-    //  }
 
 
-    //  public function borrarColumna(){
+    private function installTables()
+    {
+        $sql = '
+            CREATE TABLE IF NOT EXISTS `' . pSQL(_DB_PREFIX_) . 'democqrshooksusage_reviewer` (
+                `id_reviewer` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `id_customer` INT(10) UNSIGNED NOT NULL,
+                `is_allowed_for_review` varchar(250) NOT NULL,
+                PRIMARY KEY (`id_reviewer`)
+            ) ENGINE=' . pSQL(_MYSQL_ENGINE_) . ' COLLATE=utf8_unicode_ci;
+        ';
 
-    //     // $sql='ALTER TABLE '._DB_PREFIX_.'ps_customer ADD prueba1 VARCHAR(250) NULL';
-
-    //      $sql='ALTER TABLE '._DB_PREFIX_.'customer DROP prueba1';
-    
-    //           return  Db::getInstance()->execute($sql);
-    //  }
+        return Db::getInstance()->execute($sql);
+    }
 
 
     public function hookActionCustomerGridDefinitionModifier(array $params)
@@ -282,32 +261,35 @@ class Ps_creaTablas extends Module
 
         $translator = $this->getTranslator();
 
-      
-
         $definition
             ->getColumns()
             ->addAfter(
                 'optin',
-                ($dataColumn = new DataColumn('prueba1'))
-                    ->setName($translator->trans('prueba1', [], 'Modules.Ps_CrearTablas'))
+                ($dataColumn = new DataColumn('is_allowed_for_review'))
+                    ->setName($translator->trans('Allowed for review', [], 'Modules.Ps_DemoCQRSHooksUsage'))
                     ->setOptions([
-                        'field' => 'prueba1',
-                        // 'primary_field' => 'id_customer',
-                        // 'route' => 'ps_crearTablas',
-                        // 'route_param_name' => 'customerId',
-                    ])
+                        'field' => 'is_allowed_for_review',
+                    //     'primary_field' => 'id_customer',
+                    //     'route' => 'ps_democqrshooksusage_toggle_is_allowed_for_review',
+                    //     'route_param_name' => 'customerId',
+                     ])
             )
         ;
 
         $columns = new ColumnCollection();
         $columns->add($dataColumn);
-
         // $definition->getFilters()->add(
-        //     (new Filter('prueba1', FormattedTextareaType::class))
-        //     ->setAssociatedColumn('prueba1')
+        //     (new Filter('is_allowed_for_review', YesAndNoChoiceType::class))
+        //     ->setAssociatedColumn('is_allowed_for_review')
         // );
     }
 
+
+/**
+     * Hook allows to modify Customers query builder and add custom sql statements.
+     *
+     * @param array $params
+     */
     public function hookActionCustomerGridQueryBuilderModifier(array $params)
     {
         /** @var QueryBuilder $searchQueryBuilder */
@@ -317,54 +299,50 @@ class Ps_creaTablas extends Module
         $searchCriteria = $params['search_criteria'];
 
         $searchQueryBuilder->addSelect(
-            'IF(dcur.`prueba1` IS NULL,0,dcur.`prueba1`) AS `prueba1`'
+            'IF(dcur.`is_allowed_for_review` IS NULL,0,dcur.`is_allowed_for_review`) AS `is_allowed_for_review`'
         );
 
-        // $searchQueryBuilder->leftJoin(
-        //     'c',
-        //    '`' . pSQL(_DB_PREFIX_) . 'customer`',
-        //     'dcur',
-        //     'dcur.`prueba1` = c.`prueba1`'
-        // );
+        $searchQueryBuilder->leftJoin(
+            'c',
+            '`' . pSQL(_DB_PREFIX_) . 'democqrshooksusage_reviewer`',
+            'dcur',
+            'dcur.`id_customer` = c.`id_customer`'
+        );
 
-        if ('prueba1' === $searchCriteria->getOrderBy()) {
-            $searchQueryBuilder->orderBy('dcur.`prueba1`', $searchCriteria->getOrderWay());
+        if ('is_allowed_for_review' === $searchCriteria->getOrderBy()) {
+            $searchQueryBuilder->orderBy('dcur.`is_allowed_for_review`', $searchCriteria->getOrderWay());
         }
 
         foreach ($searchCriteria->getFilters() as $filterName => $filterValue) {
-            if ('prueba1' === $filterName) {
-                $searchQueryBuilder->andWhere('dcur.`prueba1` = :prueba1');
-                $searchQueryBuilder->setParameter('prueba1', $filterValue);
+            if ('is_allowed_for_review' === $filterName) {
+                $searchQueryBuilder->andWhere('dcur.`is_allowed_for_review` = :is_allowed_for_review');
+                $searchQueryBuilder->setParameter('is_allowed_for_review', $filterValue);
 
                 if (!$filterValue) {
-                    $searchQueryBuilder->orWhere('dcur.`prueba1` IS NULL');
+                    $searchQueryBuilder->orWhere('dcur.`is_allowed_for_review` IS NULL');
                 }
             }
         }
     }
 
 
- 
-
-public function hookActionCustomerFormBuilderModifier(array $params)
+    public function hookActionCustomerFormBuilderModifier(array $params)
 {
     /** @var FormBuilderInterface $formBuilder */
-
-    
     $formBuilder = $params['form_builder'];
-    $formBuilder->add('prueba1', FormattedTextareaType::class, [
-        'label' => $this->getTranslator()->trans('prueba2', [], 'Modules.Ps_CreaTablas'),
+    $formBuilder->add('is_allowed_for_review', TextWithUnitType::class, [
+        'label' => $this->getTranslator()->trans('Allow reviews', [], 'Modules.Ps_DemoCQRSHooksUsage'),
         'required' => false,
     ]);
     
     $customerId = $params['id'];
     
-    $params['data']['prueba1'] = $this->getIsprueba1($customerId);
+    $params['data']['is_allowed_for_review'] = $this->getIsAllowedForReview($customerId);
 
     $formBuilder->setData($params['data']);
 }
-
-private function getIsprueba1($customerId)
+    
+private function getIsAllowedForReview($customerId)
 {
     // implement your data retrieval logic here
     
@@ -387,52 +365,8 @@ private function updateCustomerReviewStatus(array $params)
     $customerId = $params['id'];
     /** @var array $customerFormData */
     $customerFormData = $params['form_data'];
-    $prueba1 = (bool) $customerFormData['prueba1'];
-
-  
-
-
+    $isAllowedForReview = (bool) $customerFormData['is_allowed_for_review'];
     
     // implement review status saving here
 }
-
-
-// protected function getId()
-// {
-//     return 'products';
-// }
-
-// protected function getName()
-// {
-//     return $this->trans('Products', [], 'Admin.Advparameters.Feature');
-// }
-
-// protected function getColumns()
-// {
-//     return (new ColumnCollection())
-//         ->add((new DataColumn('id_product'))
-//             ->setName($this->trans('ID', [], 'Admin.Global'))
-//             ->setOptions([
-//                 'field' => 'id_product',
-//             ])
-//         )
-//         ->add((new DataColumn('reference'))
-//             ->setName($this->trans('Reference', [], 'Admin.Advparameters.Feature'))
-//             ->setOptions([
-//                 'field' => 'reference',
-//             ])
-//         )
-//         ->add((new DataColumn('name'))
-//             ->setName($this->trans('Name', [], 'Admin.Advparameters.Feature'))
-//             ->setOptions([
-//                 'field' => 'name',
-//             ])
-//         )
-//     ;
-// }
-
-
-
-
-    
 }

@@ -75,6 +75,7 @@ class AdminCustomerThreadsControllerCore extends AdminController
                 'filter_key' => 'customer',
                 'tmpTableFilter' => true,
             ),
+			
             'email' => array(
                 'title' => $this->trans('Email', array(), 'Admin.Global'),
                 'filter_key' => 'a!email',

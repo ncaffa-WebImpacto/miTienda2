@@ -115,6 +115,7 @@ class CustomerCore extends ObjectModel
     /** @var bool Status */
     public $is_guest = 0;
 
+
     /** @var bool True if carrier has been deleted (staying in database as deleted) */
     public $deleted = 0;
 
