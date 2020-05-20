@@ -150,6 +150,7 @@ class CustomerFormatterCore implements FormFormatterInterface
                     'Shop.Forms.Labels'
                 ));
         }
+	
 
         $format['email'] = (new FormField())
             ->setName('email')

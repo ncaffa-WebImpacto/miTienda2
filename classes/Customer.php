@@ -143,6 +143,7 @@ class CustomerCore extends ObjectModel
 
     public $groupBox;
 
+
     /** @var string Unique token for forgot passsword feature */
     public $reset_password_token;
 
