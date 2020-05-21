@@ -769,6 +769,7 @@ class AdminCustomerThreadsControllerCore extends AdminController
         }
 
         return parent::renderView();
+		
     }
 
     public function getTimeline($messages, $id_order)

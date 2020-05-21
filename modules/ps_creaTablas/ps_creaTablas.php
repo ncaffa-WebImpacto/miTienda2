@@ -1,15 +1,20 @@
  <?php
 
 
+
 use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
 use PrestaShopBundle\Form\Admin\Type\YesAndNoChoiceType;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
-
 use Symfony\Component\Form\FormBuilderInterface;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
+
+
+
+ 
+
 
 /**
 * 2007-2020 PrestaShop
@@ -74,13 +79,7 @@ class Ps_creaTablas extends Module
         Configuration::updateValue('PS_CREATABLAS_LIVE_MODE', false);
 
          include(dirname(__FILE__).'/sql/install.php');
- 
-        //  if($this->crearColumna()){
-        //      echo "funciona";
-        //      return true;
-        //  }else{
-        //      echo "no funciona";
-        // }
+
 
         return parent::install() &&
             $this->registerHook('header') &&
@@ -92,21 +91,14 @@ class Ps_creaTablas extends Module
             $this->registerHook('actionAfterUpdateCustomerFormHandler');
            
 			
-			// $this->crearColumna();
+			
     }
 
     public function uninstall()
     {
         Configuration::deleteByName('PS_CREATABLAS_LIVE_MODE');
         include(dirname(__FILE__).'/sql/uninstall.php');
-      
-
-        //  if($this->borrarColumna()){
-        //      echo "funciona";
-        //      return true;
-        //  }else{
-        //      echo "no funciona";
-        //  }
+    
 
         return parent::uninstall();
     }
@@ -242,6 +234,8 @@ class Ps_creaTablas extends Module
         if (Tools::getValue('module_name') == $this->name) {
             $this->context->controller->addJS($this->_path.'views/js/back.js');
             $this->context->controller->addCSS($this->_path.'views/css/back.css');
+            
+        
         }
     }
 
@@ -252,64 +246,25 @@ class Ps_creaTablas extends Module
     {
         $this->context->controller->addJS($this->_path.'/views/js/front.js');
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+        
+       
     }
     
+     public function crearFiltro(array $params)
+     {
+    //     /** @var GridDefinitionInterface $definition */
+         $definition = $params['definition'];
 
-    //  public function crearColumna(){
-
-    //     // $sql='ALTER TABLE '._DB_PREFIX_.'ps_customer ADD prueba1 VARCHAR(250) NULL';
-
-    //      $sql='ALTER TABLE '._DB_PREFIX_.'customer ADD prueba1 VARCHAR(250) NULL';
-    
-    //           return  Db::getInstance()->execute($sql);
-    //  }
-
-
-    //  public function borrarColumna(){
-
-    //     // $sql='ALTER TABLE '._DB_PREFIX_.'ps_customer ADD prueba1 VARCHAR(250) NULL';
-
-    //      $sql='ALTER TABLE '._DB_PREFIX_.'customer DROP prueba1';
-    
-    //           return  Db::getInstance()->execute($sql);
-    //  }
-
-
-    public function hookActionCustomerGridDefinitionModifier(array $params)
-    {
-        /** @var GridDefinitionInterface $definition */
-        $definition = $params['definition'];
-
-        $translator = $this->getTranslator();
-
-      
-
-        $definition
-            ->getColumns()
-            ->addAfter(
-                'optin',
-                ($dataColumn = new DataColumn('prueba1'))
-                    ->setName($translator->trans('prueba1', [], 'Modules.Ps_CrearTablas'))
-                    ->setOptions([
-                        'field' => 'prueba1',
-                        // 'primary_field' => 'id_customer',
-                        // 'route' => 'ps_crearTablas',
-                        // 'route_param_name' => 'customerId',
-                    ])
-            )
-        ;
-
-        $columns = new ColumnCollection();
-        $columns->add($dataColumn);
-
-        // $definition->getFilters()->add(
-        //     (new Filter('prueba1', FormattedTextareaType::class))
-        //     ->setAssociatedColumn('prueba1')
-        // );
-    }
+         $definition->getFilters()->add(
+            (new Filter('prueba1', FormattedTextareaType::class))
+            ->setAssociatedColumn('prueba1')
+        );
+}
 
     public function hookActionCustomerGridQueryBuilderModifier(array $params)
     {
+            $this->crearFiltro();
+
         /** @var QueryBuilder $searchQueryBuilder */
         $searchQueryBuilder = $params['search_query_builder'];
 
@@ -317,27 +272,21 @@ class Ps_creaTablas extends Module
         $searchCriteria = $params['search_criteria'];
 
         $searchQueryBuilder->addSelect(
-            'IF(dcur.`prueba1` IS NULL,0,dcur.`prueba1`) AS `prueba1`'
+            'IF(prueba1 IS NULL,prueba1) AS prueba1'
         );
 
-        // $searchQueryBuilder->leftJoin(
-        //     'c',
-        //    '`' . pSQL(_DB_PREFIX_) . 'customer`',
-        //     'dcur',
-        //     'dcur.`prueba1` = c.`prueba1`'
-        // );
-
+      
         if ('prueba1' === $searchCriteria->getOrderBy()) {
-            $searchQueryBuilder->orderBy('dcur.`prueba1`', $searchCriteria->getOrderWay());
+            $searchQueryBuilder->orderBy('prueba1', $searchCriteria->getOrderWay());
         }
 
         foreach ($searchCriteria->getFilters() as $filterName => $filterValue) {
             if ('prueba1' === $filterName) {
-                $searchQueryBuilder->andWhere('dcur.`prueba1` = :prueba1');
+                $searchQueryBuilder->andWhere('prueba1 = :prueba1');
                 $searchQueryBuilder->setParameter('prueba1', $filterValue);
 
                 if (!$filterValue) {
-                    $searchQueryBuilder->orWhere('dcur.`prueba1` IS NULL');
+                    $searchQueryBuilder->orWhere('prueba1 IS NULL');
                 }
             }
         }
@@ -350,36 +299,33 @@ public function hookActionCustomerFormBuilderModifier(array $params)
 {
     /** @var FormBuilderInterface $formBuilder */
 
-    
+    $customerId = $params['id'];
+
+   $newCoustomer = new Customer($customerId);
+
     $formBuilder = $params['form_builder'];
     $formBuilder->add('prueba1', FormattedTextareaType::class, [
         'label' => $this->getTranslator()->trans('prueba2', [], 'Modules.Ps_CreaTablas'),
         'required' => false,
     ]);
     
-    $customerId = $params['id'];
-    
-    $params['data']['prueba1'] = $this->getIsprueba1($customerId);
-
     $formBuilder->setData($params['data']);
-}
-
-private function getIsprueba1($customerId)
-{
-    // implement your data retrieval logic here
-    
-    return true;
+    $newCoustomer->save();
 }
 
 
 public function hookActionAfterUpdateCustomerFormHandler(array $params)
 {
+    
+    
     $this->updateCustomerReviewStatus($params);
 }
 
 public function hookActionAfterCreateCustomerFormHandler(array $params)
 {
     $this->updateCustomerReviewStatus($params);
+    
+   
 }
 
 private function updateCustomerReviewStatus(array $params)
@@ -388,51 +334,24 @@ private function updateCustomerReviewStatus(array $params)
     /** @var array $customerFormData */
     $customerFormData = $params['form_data'];
     $prueba1 = (bool) $customerFormData['prueba1'];
+    
+    
+    
 
   
 
 
     
-    // implement review status saving here
+   
 }
 
 
-// protected function getId()
-// {
-//     return 'products';
-// }
 
-// protected function getName()
-// {
-//     return $this->trans('Products', [], 'Admin.Advparameters.Feature');
-// }
-
-// protected function getColumns()
-// {
-//     return (new ColumnCollection())
-//         ->add((new DataColumn('id_product'))
-//             ->setName($this->trans('ID', [], 'Admin.Global'))
-//             ->setOptions([
-//                 'field' => 'id_product',
-//             ])
-//         )
-//         ->add((new DataColumn('reference'))
-//             ->setName($this->trans('Reference', [], 'Admin.Advparameters.Feature'))
-//             ->setOptions([
-//                 'field' => 'reference',
-//             ])
-//         )
-//         ->add((new DataColumn('name'))
-//             ->setName($this->trans('Name', [], 'Admin.Advparameters.Feature'))
-//             ->setOptions([
-//                 'field' => 'name',
-//             ])
-//         )
-//     ;
-// }
 
 
 
 
     
 }
+
+

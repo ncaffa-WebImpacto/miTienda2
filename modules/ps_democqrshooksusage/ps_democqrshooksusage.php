@@ -138,6 +138,7 @@ class Ps_democqrshooksusage extends Module
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
+        $helper->fields_value['is_allowed_for_review'] = Configuration::get("is_allowed_for_review");
 
         return $helper->generateForm(array($this->getConfigForm()));
     }
@@ -340,6 +341,8 @@ class Ps_democqrshooksusage extends Module
     $params['data']['is_allowed_for_review'] = $this->getIsAllowedForReview($customerId);
 
     $formBuilder->setData($params['data']);
+
+    
 }
     
 private function getIsAllowedForReview($customerId)
@@ -366,7 +369,11 @@ private function updateCustomerReviewStatus(array $params)
     /** @var array $customerFormData */
     $customerFormData = $params['form_data'];
     $isAllowedForReview = (bool) $customerFormData['is_allowed_for_review'];
-    
+    $num = Tools::getValue('is_allowed_for_review');
+
+    Configuration::updateValue("is_allowed_for_review",$num);
+
+
     // implement review status saving here
 }
 }
