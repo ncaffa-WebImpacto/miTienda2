@@ -1,8 +1,8 @@
  <?php
 
-require_once ('C:\xampp\htdocs\mitienda2\override\classes\Customer.php');
 
-use override\classes\Customer as cliente;
+
+
 
 use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
@@ -13,7 +13,7 @@ use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use Symfony\Component\Form\FormBuilderInterface;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 
-use Customer;
+
 
 
 
@@ -316,25 +316,51 @@ class Ps_creaTablas extends Module
     }
 
 
+
+
+
+    public function hookActionCustomerFormBuilderModifier(array $params)
+    {
+        /** @var FormBuilderInterface $formBuilder */
+        $formBuilder = $params['form_builder'];
+        $formBuilder->add('is_allowed_for_review', SwitchType::class, [
+            'label' => $this->getTranslator()->trans('Allow reviews', [], 'Modules.Ps_DemoCQRSHooksUsage'),
+            'required' => false,
+        ]);
+        
+        $customerId = $params['id'];
+        
+        $params['data']['is_allowed_for_review'] = $this->getIsAllowedForReview($customerId);
+    
+        $formBuilder->setData($params['data']);
+    }
+        
+    private function getIsAllowedForReview($customerId)
+    {
+        // implement your data retrieval logic here
+        
+        return true;
+    }
+
  
 
-public function hookActionCustomerFormBuilderModifier(array $params)
-{
-    /** @var FormBuilderInterface $formBuilder */
+// public function hookActionCustomerFormBuilderModifier(array $params)
+// {
+//     /** @var FormBuilderInterface $formBuilder */
 
-    $customerId = $params['id'];
+//     $customerId = $params['id'];
 
-     $newCoustomer = new cliente($customerId);
+//      $newCoustomer = new Customer($customerId);
 
-    $formBuilder = $params['form_builder'];
-    $formBuilder->add('prueba1', FormattedTextareaType::class, [
-        'label' => $this->getTranslator()->trans('prueba2', [], 'Modules.Ps_CreaTablas'),
-        'required' => false,
-    ]);
+//     $formBuilder = $params['form_builder'];
+//     $formBuilder->add('prueba1', FormattedTextareaType::class, [
+//         'label' => $this->getTranslator()->trans('prueba2', [], 'Modules.Ps_CreaTablas'),
+//         'required' => false,
+//     ]);
     
-    $formBuilder->setData($params['data']);
-    $newCoustomer->save();
-}
+//     $formBuilder->setData($params['data']);
+//     $newCoustomer->save();
+// }
 
 
 public function hookActionAfterUpdateCustomerFormHandler(array $params)
