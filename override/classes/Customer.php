@@ -19,5 +19,8 @@ Class Customer extends CustomerCore
      public function setPrueba1($prueba1){
             $this->$prueba1 = $prueba1;
      }
+
+
+     
 }
 ?>
