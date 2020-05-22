@@ -1,6 +1,8 @@
  <?php
 
+require_once ('C:\xampp\htdocs\mitienda2\override\classes\Customer.php');
 
+use override\classes\Customer as cliente;
 
 use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
@@ -10,6 +12,13 @@ use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use Symfony\Component\Form\FormBuilderInterface;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
+
+use Customer;
+
+
+
+
+
 
 
 
@@ -265,18 +274,32 @@ class Ps_creaTablas extends Module
     {
             $this->crearFiltro();
 
-        /** @var QueryBuilder $searchQueryBuilder */
-        $searchQueryBuilder = $params['search_query_builder'];
+        // /** @var QueryBuilder $searchQueryBuilder */
+        // $searchQueryBuilder = $params['search_query_builder'];
 
-        /** @var CustomerFilters $searchCriteria */
-        $searchCriteria = $params['search_criteria'];
+        // /** @var CustomerFilters $searchCriteria */
+        // $searchCriteria = $params['search_criteria'];
 
-        $searchQueryBuilder->addSelect(
-            'IF(prueba1 IS NULL,prueba1) AS prueba1'
-        );
+        // $searchQueryBuilder->addSelect(
+        //     'IF(prueba1 IS NULL,prueba1) AS prueba1'
+        // );
+
+        // $searchQueryBuilder->leftJoin(
+        //     'c',
+        //     '`' . pSQL(_DB_PREFIX_) . 'customer`',
+        //     'dcur',
+        //     'dcur.`prueba1` = c.`prueba1`'
+        // );
+
+        $sql->select('prueba1');
+        $sql->from('ps_customer');
+
+        $result = Db::getInstance()->executeS($sql);
+
+
 
       
-        if ('prueba1' === $searchCriteria->getOrderBy()) {
+        if ($result === $searchCriteria->getOrderBy()) {
             $searchQueryBuilder->orderBy('prueba1', $searchCriteria->getOrderWay());
         }
 
@@ -301,7 +324,7 @@ public function hookActionCustomerFormBuilderModifier(array $params)
 
     $customerId = $params['id'];
 
-   $newCoustomer = new Customer($customerId);
+     $newCoustomer = new cliente($customerId);
 
     $formBuilder = $params['form_builder'];
     $formBuilder->add('prueba1', FormattedTextareaType::class, [

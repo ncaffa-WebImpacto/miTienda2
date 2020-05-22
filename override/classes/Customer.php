@@ -1,5 +1,8 @@
-<?php 
-Class Customer extends CustomerCore
+<?php   
+	
+ namespace override\classes\Customer;
+
+Class Customer extends \CustomerCore
 {
      public $prueba1;
 
