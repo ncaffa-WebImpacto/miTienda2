@@ -353,37 +353,32 @@ public function hookActionCustomerFormBuilderModifier(array $params)
 
 
 public function hookActionAfterUpdateCustomerFormHandler(array $params)
+
 {
+    $this->updateCustomerReviewStatus($params);
+}
     
-    // $customerId = $params['id'];
-    // /** @var array $customerFormData */
-    // $customerFormData = $params['form_data'];
-    // $prueba1 = (bool) $customerFormData['prueba1'];+
+
+
+public function hookActionAfterCreateCustomerFormHandler(array $params)
+{
+
+    $this->crearCustomerReviewStatus($params);
     
+   
+}
+
+private function crearCustomerReviewStatus(array $params)
+{
     $customerId = $params['id'];
     /** @var array $customerFormData */
     $customerFormData = $params['form_data'];
     $prueba1 = $customerFormData['prueba1'];
+    $newCoustomer = new Customer($customerId);
+    $newCoustomer->prueba1= $prueba1;
+    $newCoustomer->add();
+    $newCoustomer->save();
 
-     $newCoustomer = new Customer($customerId);
-     $newCoustomer->setPrueba1($prueba1);
-
-    // dump($newCoustomer->getPrueba1());
-
-    $prueba2 = $newCoustomer->getPrueba1();
-    
-     dump($prueba1);
-
-    dump($prueba2);
-    exit("eyy");
-
-    $this->updateCustomerReviewStatus($params);
-}
-
-public function hookActionAfterCreateCustomerFormHandler(array $params)
-{
-    $this->updateCustomerReviewStatus($params);
-    
    
 }
 
@@ -393,20 +388,12 @@ private function updateCustomerReviewStatus(array $params)
     /** @var array $customerFormData */
     $customerFormData = $params['form_data'];
     $prueba1 = $customerFormData['prueba1'];
-
     $newCoustomer = new Customer($customerId);
-    $newCoustomer->setPrueba1($prueba1);
+    $newCoustomer->prueba1= $prueba1;
     $newCoustomer->update();
-    $newCoustomer->save();
 
-
-
-   
-
-
-    
-   
 }
+
 
 
 
