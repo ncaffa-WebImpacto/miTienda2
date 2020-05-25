@@ -4,15 +4,21 @@
 
 
 
-use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
+use PrestaShop\PrestaShop\Core\Grid\Definition\CustomerGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ToggleColumn;
 use PrestaShopBundle\Form\Admin\Type\YesAndNoChoiceType;
 use PrestaShop\PrestaShop\Core\Grid\Definition\Factory\AbstractGridDefinitionFactory;
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use Symfony\Component\Form\FormBuilderInterface;
-use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use PrestaShopBundle\Form\Admin\Type\FormattedTextareaType;
+use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinition;
+use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
+use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
+
+
+
+
 
 
 
@@ -274,62 +280,60 @@ class Ps_creaTablas extends Module
 //         );
 // }
 
-    // public function hookActionCustomerGridQueryBuilderModifier(array $params)
+    public function hookActionCustomerGridQueryBuilderModifier(array $params)
+    {
+            // $this->crearFiltro();
+
+        /** @var QueryBuilder $searchQueryBuilder */
+        $searchQueryBuilder = $params['search_query_builder'];
+
+   
+
+        // /** @var CustomerFilters $searchCriteria */
+        // $searchCriteria = $params['search_criteria'];
+
+        $searchQueryBuilder->AddSelect('c.prueba1');
+    
+    //  dump($searchQueryBuilder );
+    //             exit("ss");
+       
+    }
+
+
+
+    public function hookActionCustomerGridDefinitionModifier(array $params)
+    {
+        /** @var GridDefinitionInterface $definition */
+          $definition = $params['definition'];
+
+            //  dump($definition->getColumns());
+            //  exit("ss");
+        
+         $translator = $this->getTranslator();
+
+         $definition
+        ->getColumns()
+        ->addAfter(
+            'optin',
+            ($dataColumn =new DataColumn('prueba1'))
+                ->setName($translator->trans('prueba1',[], 'Modules.Ps_creaTabla'))
+                ->setOptions([
+                    'field' => 'prueba1',
+                ])
+        )
+    ;
+
+    }
+
+    // private function getIsAllowedForReview($customerId)
     // {
-    //         $this->crearFiltro();
-
-    //     /** @var QueryBuilder $searchQueryBuilder */
-    //     $searchQueryBuilder = $params['search_query_builder'];
-
-    //     /** @var CustomerFilters $searchCriteria */
-    //     $searchCriteria = $params['search_criteria'];
-
-    //     $searchQueryBuilder->addSelect(
-    //         'IF(prueba1 IS NULL,prueba1) AS prueba1'
-    //     );
-
-    //     $searchQueryBuilder->leftJoin(
-    //         'c',
-    //         '`' . pSQL(_DB_PREFIX_) . 'customer`',
-    //         'dcur',
-    //         'dcur.`prueba1` = c.`prueba1`'
-    //     );
-
-    //     $sql->select('prueba1');
-    //     $sql->from('ps_customer');
-
-    //     $result = Db::getInstance()->executeS($sql);
-
-
-
-      
-    //     if ($result === $searchCriteria->getOrderBy()) {
-    //         $searchQueryBuilder->orderBy('prueba1', $searchCriteria->getOrderWay());
-    //     }
-
-    //     foreach ($searchCriteria->getFilters() as $filterName => $filterValue) {
-    //         if ('prueba1' === $filterName) {
-    //             $searchQueryBuilder->andWhere('prueba1 = :prueba1');
-    //             $searchQueryBuilder->setParameter('prueba1', $filterValue);
-
-    //             if (!$filterValue) {
-    //                 $searchQueryBuilder->orWhere('prueba1 IS NULL');
-    //             }
-    //         }
-    //     }
+    //     // implement your data retrieval logic here
+        
+    //     return true;
     // }
 
 
-
-
-
-        
-    private function getIsAllowedForReview($customerId)
-    {
-        // implement your data retrieval logic here
-        
-        return true;
-    }
+  
 
  
  
@@ -339,11 +343,11 @@ public function hookActionCustomerFormBuilderModifier(array $params)
     /** @var FormBuilderInterface $formBuilder */
 
      $customerId = $params['id'];
-    $formBuilder = $params['form_builder'];
+     $formBuilder = $params['form_builder'];
 
     
     $formBuilder->add('prueba1', FormattedTextareaType::class, [
-        'label' => $this->getTranslator()->trans('prueba2', [], 'Modules.Ps_CreaTablas'),
+        'label' => $this->getTranslator()->trans('prueba1', [], 'Modules.Ps_CreaTablas'),
         'required' => false,
     ]);
     
@@ -391,6 +395,7 @@ private function updateCustomerReviewStatus(array $params)
     $newCoustomer = new Customer($customerId);
     $newCoustomer->prueba1= $prueba1;
     $newCoustomer->update();
+    $newCoustomer->save();
 
 }
 
