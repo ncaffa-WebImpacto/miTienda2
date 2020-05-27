@@ -15,6 +15,7 @@ use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
 
 
+
 /**
 * 2007-2020 PrestaShop
 *
@@ -240,6 +241,49 @@ class TablaEmpleados extends Module
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
     }
 
+
+    
+    public function hookActionEmployeeGridQueryBuilderModifier(array $params)
+    {
+           
+        /** @var QueryBuilder $searchQueryBuilder */
+        $searchQueryBuilder = $params['search_query_builder'];
+
+        // dump($searchQueryBuilder);
+        // exit("ss");
+   
+        // /** @var CustomerFilters $searchCriteria */
+        // $searchCriteria = $params['search_criteria'];
+
+        $searchQueryBuilder->AddSelect('e.prueba2');
+    
+     
+    }
+
+    public function hookActionEmployeeGridDefinitionModifier(array $params)
+    {
+        /** @var GridDefinitionInterface $definition */
+          $definition = $params['definition'];
+
+            //   dump($definition->getColumns());
+            //   exit("ss");
+        
+         $translator = $this->getTranslator();
+         $definition
+        ->getColumns()
+        ->addAfter(
+            'email',
+            ($dataColumn =new DataColumn('prueba2'))
+                ->setName($translator->trans('prueba2',[], 'Modules.Ps_tablaEmpleados'))
+                ->setOptions([
+                    'field' => 'prueba2',
+                ])
+        )
+    ;
+
+    }
+
+
     public function hookActionEmployeeFormBuilderModifier(array $params)
     {
         /** @var FormBuilderInterface $formBuilder */
@@ -257,19 +301,20 @@ class TablaEmpleados extends Module
 
 public function hookActionAfterUpdateEmployeeFormHandler(array $params)
 {
+
     $this->updateEmployeeReviewStatus($params);
+
 }
     
 
 
 public function hookActionAfterCreateEmployeeFormHandler(array $params)
 {
+        //  dump($employeeFormData = $params['form_data']);
+        //     exit("oe");
+        $this->crearEmployeeReviewStatus($params);
+  
     
-
-
-    $this->crearEmployeeReviewStatus($params);
-    
-   
 }
 
 private function crearEmployeeReviewStatus(array $params)
@@ -279,15 +324,11 @@ private function crearEmployeeReviewStatus(array $params)
     /** @var array $employeeFormData */
     $employeeFormData = $params['form_data'];
 
-    // dump($employeeId);
-        // exit("eo");
-
+    // dump($employeeFormData = $params['form_data']);
+    //         exit("oe");
     $prueba2 = $employeeFormData['prueba2'];
-
-   
     $newEmployee = new Employee($employeeId);
     $newEmployee->prueba2= $prueba2;
-    $newEmployee->add();
     $newEmployee->save();
 
 }
@@ -313,47 +354,8 @@ private function updateEmployeeReviewStatus(array $params)
 }
 
 
-public function hookActionEmployeeGridDefinitionModifier(array $params)
-    {
-        /** @var GridDefinitionInterface $definition */
-          $definition = $params['definition'];
-
-            //   dump($definition->getColumns());
-            //   exit("ss");
-        
-         $translator = $this->getTranslator();
-         $definition
-        ->getColumns()
-        ->addAfter(
-            'email',
-            ($dataColumn =new DataColumn('prueba2'))
-                ->setName($translator->trans('prueba2',[], 'Modules.Ps_tablaEmpleados'))
-                ->setOptions([
-                    'field' => 'prueba2',
-                ])
-        )
-    ;
-
-    }
 
 
-
-    public function hookActionEmployeeGridQueryBuilderModifier(array $params)
-    {
-           
-        /** @var QueryBuilder $searchQueryBuilder */
-        $searchQueryBuilder = $params['search_query_builder'];
-
-        // dump($searchQueryBuilder);
-        // exit("ss");
-   
-        // /** @var CustomerFilters $searchCriteria */
-        // $searchCriteria = $params['search_criteria'];
-
-        $searchQueryBuilder->AddSelect('e.prueba2');
-    
-     
-    }
 
 
 }
