@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>infoPedido</name>
+	<displayName><![CDATA[infoPedido]]></displayName>
+	<version><![CDATA[1.0.0]]></version>
+	<description><![CDATA[Genere y guarde un archivo XML ]]></description>
+	<author><![CDATA[Nicolás Caffa Carreras]]></author>
+	<tab><![CDATA[administration]]></tab>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+</module>
